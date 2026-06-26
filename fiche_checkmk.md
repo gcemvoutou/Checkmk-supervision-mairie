@@ -30,14 +30,14 @@ Un audit a été mené pour fiabiliser cet inventaire :
 
 La base de supervision doit refléter en permanence la réalité du parc. Cela implique :
 
-- **Communication** avec les équipes techniques de la DSI pour centraliser les demandes de modifications réseau
 - **Ajout** de nouveaux hôtes lors de mises en production (nouveaux serveurs, nouvelles bornes)
 - **Modification** des fiches hôtes lors de changements d'adressage IP
 - **Suppression** des équipements retirés du parc pour maintenir un inventaire propre
 
 > [!TIP]
 > Dans Checkmk, toute modification de la configuration (ajout, suppression, modification d'un hôte) nécessite une étape d'**activation des changements** (`Activate pending changes`) pour être prise en compte. Penser à regrouper plusieurs modifications avant d'activer pour éviter des rechargements inutiles.
-
+![Ajout d'un hôte dans Checkmk](./screenshots/03_add_host.png)
+> 
 <!-- 📸 CAPTURE SUGGÉRÉE : Interface d'ajout d'un hôte dans Checkmk (formulaire "Add host") ou la vue "Pending changes" avant activation -->
 ![Ajout d'un hôte dans Checkmk](./screenshots/03_add_host.png)
 
