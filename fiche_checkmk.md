@@ -76,7 +76,7 @@ Pour optimiser la collecte des données sans surcharger le réseau, la surveilla
 > [!IMPORTANT]
 > **Configuration d'une alerte de stockage ciblée :**
 > Afin d'anticiper toute saturation critique de l'espace disque sur l'infrastructure, une règle de surveillance spécifique a été configurée pour l'ensemble des machines portant l'étiquette `Equipements : Serveurs`.
-> <img src="images/6.png" alt="Alerte de stockage ciblée" width="1000">
+> <img src="images/6.png" alt="Alerte de stockage ciblée" width="1100">
 > * **Seuils d'alerte personnalisés :** 
 >   * 🟡 **Avertissement (Warning) :** Déclenché dès que l'utilisation d'un système de fichiers atteint **80 %**.
 >   * 🔴 **Critique (Critical) :** Déclenché dès que l'utilisation atteint **90 %**.
@@ -88,7 +88,7 @@ Pour optimiser la collecte des données sans surcharger le réseau, la surveilla
 
 **Fiche d'un hôte supervisé par SNMP** ***(switch avec état des interfaces)***
 
-<img src="images/7.png" alt="Supervision par SNMP - Services d'un switch HP" width="1000">
+<img src="images/7.png" alt="Supervision par SNMP - Services d'un switch HP" width="1100">
 
 > [!NOTE]
 > Pour ce switch on peut voir : 
