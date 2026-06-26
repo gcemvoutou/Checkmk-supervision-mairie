@@ -36,7 +36,9 @@ La base de supervision doit refléter en permanence la réalité du parc. Cela i
 
 > [!TIP]
 > Dans Checkmk, toute modification de la configuration (ajout, suppression, modification d'un hôte) nécessite une étape d'**activation des changements** (`Activate pending changes`) pour être prise en compte. Penser à regrouper plusieurs modifications avant d'activer pour éviter des rechargements inutiles.
-![Ajout d'un hôte dans Checkmk](./screenshots/03_add_host.png)
+
+<img src="images/2.png" alt="Dashboard Checkmk - Vue générale" width="45%">
+
 > 
 <!-- 📸 CAPTURE SUGGÉRÉE : Interface d'ajout d'un hôte dans Checkmk (formulaire "Add host") ou la vue "Pending changes" avant activation -->
 ![Ajout d'un hôte dans Checkmk](./screenshots/03_add_host.png)
