@@ -39,9 +39,9 @@ La base de supervision doit refléter en permanence la réalité du parc. Cela i
 > 
 > <img src="images/2.png" alt="activation des changements" width="250">
 
-> 
-<!-- 📸 CAPTURE SUGGÉRÉE : Interface d'ajout d'un hôte dans Checkmk (formulaire "Add host") ou la vue "Pending changes" avant activation -->
-![Ajout d'un hôte dans Checkmk](./screenshots/03_add_host.png)
+**Interface d'ajout d'un hôte dans Checkmk (formulaire "Add host")**
+
+<img src="images/3.png" alt="Ajout d'un hôte dans Checkmk" width="250">
 
 ---
 
