@@ -110,8 +110,7 @@ Pour optimiser la collecte des données sans surcharger le réseau, la surveilla
 > - 🔴 `CRITICAL` — Seuil critique atteint (ex : disque à 95 %)
 > - ⚫ `DOWN` / `UNREACH` — L'hôte ne répond plus
 
-<!-- 📸 CAPTURE SUGGÉRÉE : Vue du dashboard avec des hôtes en WARNING ou CRITICAL (ou simulation) pour illustrer le pilotage en temps réel -->
-![Dashboard Checkmk - Alertes en cours](./screenshots/06_dashboard_alerts.png)
+<img src="images/8.png" alt="Alertes en cours" width="1000">
 
 ---
 
