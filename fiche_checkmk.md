@@ -63,8 +63,8 @@ Pour optimiser la collecte des données sans surcharger le réseau, la surveilla
 > [!NOTE]
 > Le choix de la méthode de supervision dépend des capacités de l'équipement. Un lecteur de badges ne peut pas héberger un agent Checkmk ; le ping ICMP est alors la seule méthode viable pour vérifier sa présence sur le réseau.
 
-<!-- 📸 CAPTURE SUGGÉRÉE : Fiche d'un hôte supervisé par agent (onglet "Services" avec CPU, disque, RAM visibles) -->
-![Supervision par agent - Services d'un serveur Windows](./screenshots/04_agent_services.png)
+**Fiche d'un hôte supervisé par agent** ***(onglet "Services" avec CPU, disque, RAM visibles)***
+<img src="images/5.png" alt="Supervision par agent - Services d'un serveur Windows" width="250">
 
 <!-- 📸 CAPTURE SUGGÉRÉE : Fiche d'un hôte supervisé par SNMP (switch ou borne Wi-Fi avec état des interfaces) -->
 ![Supervision SNMP - État des ports d'un switch](./screenshots/05_snmp_switch.png)
