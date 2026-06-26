@@ -41,11 +41,11 @@ La base de supervision doit refléter en permanence la réalité du parc. Cela i
 
 **Interface d'ajout d'un hôte dans Checkmk (formulaire "Add host")**
 
-<img src="images/3.png" alt="Ajout d'un hôte dans Checkmk" width="450">
+<img src="images/3.png" alt="Ajout d'un hôte dans Checkmk" width="500">
 
 **Interface suppression d'un hôte dans Checkmk (Supprimer l'hôte)**
 
-<img src="images/4.png" alt="Suppression d'un hôte dans Checkmk" width="300">
+<img src="images/4.png" alt="Suppression d'un hôte dans Checkmk" width="250">
 
 ---
 
