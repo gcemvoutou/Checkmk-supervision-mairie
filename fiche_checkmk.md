@@ -5,18 +5,6 @@
 
 ---
 
-## 📋 Informations générales
-
-| Champ | Détail |
-|---|---|
-| **Rôle** | Technicien Système et Réseau (Alternant — BTS SIO SISR) |
-| **Outil** | Checkmk Raw Edition (CRE) |
-| **Architecture** | Site unique centralisé — serveur `monitoring` |
-| **Périmètre** | 204 hôtes supervisés (parc en évolution continue), multi-sites municipaux |
-
----
-
-
 ## 2. Compétences et missions réalisées
 
 ### 2.1 — Reprise et assainissement de l'existant
