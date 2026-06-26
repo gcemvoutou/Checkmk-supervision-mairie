@@ -1,4 +1,4 @@
-# 📁 Fiche Projet Portfolio — Supervision Réseau avec Checkmk
+#  Supervision Réseau avec Checkmk
 
 > **Administration et Optimisation de la Supervision Réseau**
 > Direction des Systèmes d'Information (DSI) — Mairie (collectivité territoriale)
@@ -9,7 +9,6 @@
 
 | Champ | Détail |
 |---|---|
-| **Structure** | DSI — Mairie (collectivité territoriale) |
 | **Rôle** | Technicien Système et Réseau (Alternant — BTS SIO SISR) |
 | **Outil** | Checkmk Raw Edition (CRE) |
 | **Architecture** | Site unique centralisé — serveur `monitoring` |
