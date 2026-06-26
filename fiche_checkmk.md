@@ -21,9 +21,6 @@ Un audit a été mené pour fiabiliser cet inventaire :
 > [!IMPORTANT]
 > Cette phase d'audit terrain est essentielle : un superviseur réseau n'a de valeur que si sa base de données reflète fidèlement la réalité de l'infrastructure. Des hôtes mal référencés génèrent des faux positifs et nuisent à la réactivité de l'équipe.
 
-<!-- 📸 CAPTURE SUGGÉRÉE : Liste des hôtes dans Checkmk avec filtrage par état (ex : vue "All hosts" ou liste avec états DOWN / UNREACH) -->
-![Liste des hôtes supervisés](./screenshots/02_hosts_list.png)
-
 ---
 
 ### 2.2 — Gestion du cycle de vie des hôtes
