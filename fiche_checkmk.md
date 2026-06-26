@@ -65,7 +65,7 @@ Pour optimiser la collecte des données sans surcharger le réseau, la surveilla
 
 **Fiche d'un hôte supervisé par agent** ***(onglet "Services" avec CPU, disque, RAM visibles)***
 
-<img src="images/5.png" alt="Supervision par agent - Services d'un serveur Windows" width="700">
+<img src="images/5.png" alt="Supervision par agent - Services d'un serveur Windows" width="1000">
 
 <!-- 📸 CAPTURE SUGGÉRÉE : Fiche d'un hôte supervisé par SNMP (switch ou borne Wi-Fi avec état des interfaces) -->
 ![Supervision SNMP - État des ports d'un switch](./screenshots/05_snmp_switch.png)
