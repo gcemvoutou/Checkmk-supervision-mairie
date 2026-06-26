@@ -13,7 +13,5 @@ L'outil retenu est **Checkmk Raw Edition (CRE)**, déployé sur un serveur Linux
 > [!NOTE]
 > Checkmk Raw Edition (CRE) est la version open source gratuite de Checkmk. Elle offre toutes les fonctionnalités essentielles de supervision sans licence commerciale, ce qui la rend adaptée au contexte d'une collectivité territoriale.
 
-<!-- 📸 CAPTURE SUGGÉRÉE : Vue d'ensemble du dashboard Checkmk (page d'accueil avec le résumé des hôtes OK / WARNING / CRITICAL) -->
-![Dashboard Checkmk - Vue générale](./screenshots/01_dashboard_overview.png)
+![Dashboard Checkmk - Vue générale](./images/1.png)
 
----
