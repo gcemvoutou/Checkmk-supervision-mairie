@@ -110,7 +110,7 @@ Pour optimiser la collecte des données sans surcharger le réseau, la surveilla
 > - 🔴 `CRITICAL` — Seuil critique atteint (ex : disque à 95 %)
 > - ⚫ `DOWN` / `UNREACH` — L'hôte ne répond plus
 
-<img src="images/9.png" alt="Alertes en cours" width="200">
+<img src="images/9.png" alt="Alertes en cours" width="400">
 
 ---
 
