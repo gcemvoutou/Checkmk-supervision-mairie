@@ -46,6 +46,7 @@ La base de supervision doit refléter en permanence la réalité du parc. Cela i
 **Interface suppression d'un hôte dans Checkmk (Supprimer l'hôte")**
 
 <img src="images/4.png" alt="Suppression d'un hôte dans Checkmk" width="450">
+
 ---
 
 ### 2.3 — Implémentation des protocoles de supervision
