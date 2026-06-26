@@ -87,7 +87,7 @@ Pour optimiser la collecte des données sans surcharger le réseau, la surveilla
 
 
 **Fiche d'un hôte supervisé par SNMP** ***(switch avec état des interfaces)***
-![Supervision SNMP - État des ports d'un switch](./screenshots/05_snmp_switch.png)
+
 <img src="images/7.png" alt="Supervision par SNMP - Services d'un switch HP" width="1000">
 
 > [!NOTE]
