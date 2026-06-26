@@ -86,9 +86,15 @@ Pour optimiser la collecte des données sans surcharger le réseau, la surveilla
 > * **Canal de transmission :** En cas de franchissement de seuil, une notification par **Courriel HTML** est automatiquement envoyée en temps réel à l'adresse de l'équipe informatique .
 
 
-<!-- 📸 CAPTURE SUGGÉRÉE : Fiche d'un hôte supervisé par SNMP (switch ou borne Wi-Fi avec état des interfaces) -->
+**Fiche d'un hôte supervisé par SNMP** ***(switch avec état des interfaces)***
 ![Supervision SNMP - État des ports d'un switch](./screenshots/05_snmp_switch.png)
+<img src="images/7.png" alt="Supervision par SNMP - Services d'un switch HP" width="1000">
 
+> [!NOTE]
+> Pour ce switch on peut voir : 
+> * **L'état de la supervision :** Ligne `Check_MK` $\rightarrow$ Le protocole SNMP communique avec succès (`[snmp] Success`) et l'interrogation prend seulement **0.4 seconde**.
+> * **Les informations matériel :** Ligne `SNMP Info` $\rightarrow$ Checkmk identifie précisément l'équipement : un switch **HP 2530-24-PoEP** avec la version de son firmware.
+> * **L'Uptime (Temps d'allumage) :** Ligne `Uptime` $\rightarrow$ Le switch est en ligne et fonctionne sans interruption depuis **210 jours** (allumé depuis le 27 novembre 2025).
 ---
 
 ### 2.4 — Exploitation et Maintien en Condition Opérationnelle (MCO)
