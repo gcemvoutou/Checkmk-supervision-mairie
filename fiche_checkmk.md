@@ -67,10 +67,11 @@ Pour optimiser la collecte des données sans surcharger le réseau, la surveilla
 
 <img src="images/5.png" alt="Supervision par agent - Services d'un serveur Windows" width="1000">
 
-Pour ce serveur on peut voir : 
-* **Le CPU (Processeur) :** Ligne `CPU utilization` $\rightarrow$ Le serveur utilise seulement **1.20 %** de sa puissance.
-* **Le Disque (Stockage) :** Ligne `Filesystem C:/` $\rightarrow$ Le disque est rempli à **30.68 %** (59 Go utilisés sur 193 Go).
-* **L'Uptime (Temps d'allumage) :** Ligne `Uptime` $\rightarrow$ Le serveur est allumé et fonctionne sans interruption depuis **16 jours**.
+> [!NOTE]
+>Pour ce serveur on peut voir : 
+>* **Le CPU (Processeur) :** Ligne `CPU utilization` $\rightarrow$ Le serveur utilise seulement **1.20 %** de sa puissance.
+>* **Le Disque (Stockage) :** Ligne `Filesystem C:/` $\rightarrow$ Le disque est rempli à **30.68 %** (59 Go utilisés sur 193 Go).
+>* **L'Uptime (Temps d'allumage) :** Ligne `Uptime` $\rightarrow$ Le serveur est allumé et fonctionne sans interruption depuis **16 jours**.
 
 
 
