@@ -73,6 +73,17 @@ Pour optimiser la collecte des données sans surcharger le réseau, la surveilla
 >* **Le Disque (Stockage) :** Ligne `Filesystem C:/` $\rightarrow$ Le disque est rempli à **30.68 %** (59 Go utilisés sur 193 Go).
 >* **L'Uptime (Temps d'allumage) :** Ligne `Uptime` $\rightarrow$ Le serveur est allumé et fonctionne sans interruption depuis **16 jours**.
 
+> [!IMPORTANT]
+> **Configuration d'une alerte de stockage ciblée :**
+> Afin d'anticiper toute saturation critique de l'espace disque sur l'infrastructure, une règle de surveillance spécifique a été configurée pour l'ensemble des machines portant l'étiquette `Equipements : Serveurs`.
+> <img src="images/6.png" alt="Alerte de stockage ciblée" width="1000">
+> * **Seuils d'alerte personnalisés :** 
+>   * 🟡 **Avertissement (Warning) :** Déclenché dès que l'utilisation d'un système de fichiers atteint **80 %**.
+>   * 🔴 **Critique (Critical) :** Déclenché dès que l'utilisation atteint **90 %**.
+> * **Filtrage des notifications :** Pour éviter la pollution visuelle et la réception de fausses alertes, un double filtrage strict a été mis en place :
+>   1. **Par type d'équipement :** Restriction exclusive aux hôtes taggués comme `Serveurs`.
+>   2. **Par type de service :** Ciblage exclusif des services correspondant à l'expression `Filesystem`.
+> * **Canal de transmission :** En cas de franchissement de seuil, une notification par **Courriel HTML** est automatiquement envoyée en temps réel à l'adresse de l'équipe informatique .
 
 
 <!-- 📸 CAPTURE SUGGÉRÉE : Fiche d'un hôte supervisé par SNMP (switch ou borne Wi-Fi avec état des interfaces) -->
