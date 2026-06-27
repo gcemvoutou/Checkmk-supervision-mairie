@@ -126,9 +126,9 @@ Certaines bornes Wi-Fi apparaissaient en état **DOWN** dans Checkmk sans qu'auc
 > [!IMPORTANT]
 > Ce cas illustre une bonne pratique d'escalade : plutôt que de contourner le problème (ex : désactiver l'alerte), la cause racine a été identifiée et remontée au bon interlocuteur. Les équipements de supervision doivent idéalement être sur un **VLAN de management dédié** avec des adresses IP fixes pour garantir la fiabilité des données.
 
-<!-- 📸 CAPTURE SUGGÉRÉE : Hôte en état DOWN dans Checkmk avec l'historique des changements d'état (pour illustrer les faux positifs répétitifs) -->
-![Historique d'état d'un hôte - faux positifs DHCP](./screenshots/07_host_down_history.png)
+**Historique d'état d'un hôte** - ***(faux positifs DHCP)***
 
+<img src="images/10.png" alt="Historique d'état d'un hôte" width="500">
 ---
 
 ### 3.2 — Inventaire initial incomplet et non fiabilisé
