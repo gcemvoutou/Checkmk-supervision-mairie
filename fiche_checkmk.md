@@ -128,11 +128,11 @@ Certaines bornes Wi-Fi apparaissaient en état **DOWN** dans Checkmk sans qu'auc
 
 **Historique d'état d'un hôte** - ***(faux positifs DHCP)***
 
-<img src="images/10.png" alt="Historique d'état d'un hôte" width="500">
+<img src="images/10.png" alt="Historique d'état d'un hôte" width="800">
 
 > [!NOTE]
 > Pour cet équipement réseau (borne) on peut voir : 
-> * **L'état d'alerte initial :** Lignes `HOST ALERT` (mercredi et jeudi) $\rightarrow$ L'outil détecte un état critique **CRITICAL (DOWN)** avec une perte de paquets de **100%** (`lost 100%`), ce qui laisse penser que la borne est en panne.
+> * **L'état d'alerte initial :** Lignes `HOST ALERT` $\rightarrow$ L'outil détecte un état critique **CRITICAL (DOWN)** avec une perte de paquets de **100%** (`lost 100%`), ce qui laisse penser que la borne est en panne.
 > * **Le changement et la mise à jour de l'IP :** Durant cette coupure apparente, la borne (configurée en IP dynamique via DHCP) change d'adresse et obtient un nouveau bail réseau, déclenchant la mise à jour de ses informations.
 > * **Le retour automatique à la normale :** Lignes `HOST NOTIFICATION` $\rightarrow$ La borne remonte instantanément en état stable **HARD (UP)** avec une excellente latence (`rta 0.462ms`) et **0% de perte**.
 > * **Mise en évidence d'un faux positif :** Ce cycle montre un cas typique de **faux positif**. La borne n'a jamais subi de panne matérielle : le serveur de supervision a simplement cherché l'ancienne IP dans le vide, générant une fausse alerte le temps que la nouvelle adresse IP soit prise en compte.
