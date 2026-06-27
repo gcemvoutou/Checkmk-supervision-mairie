@@ -179,7 +179,3 @@ De nombreux équipements présents dans Checkmk n'existaient plus physiquement s
 - Audit et vérification terrain
 - Escalade et remontée d'incidents structurée
 - Rigueur dans la tenue d'un inventaire à jour
-
----
-
-*Document rédigé dans le cadre du BTS SIO SISR — Alternance DSI Mairie*
