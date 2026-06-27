@@ -162,7 +162,6 @@ De nombreux équipements présents dans Checkmk n'existaient plus physiquement s
 |---|---|
 | Bornes Wi-Fi en adressage dynamique (faux positifs) | Création d'un VLAN management ou réservations DHCP |
 | Supervision uniquement temps réel | Mise en place de rapports périodiques automatisés (fonctionnalité native Checkmk) |
-| Pas de supervision des équipements hors réseau local | Étude d'un déploiement distribué si de nouveaux sites sont raccordés |
 
 ---
 
@@ -172,13 +171,11 @@ De nombreux équipements présents dans Checkmk n'existaient plus physiquement s
 
 - Administration de Checkmk Raw Edition (CRE)
 - Supervision réseau : Agent, SNMP, HTTP/URL, ICMP (ping)
-- Gestion d'adressage IP, notions DHCP et VLAN
 - Administration Linux (serveur `monitoring`)
 - Diagnostic réseau terrain
 
 ### Compétences transversales
 
-- Communication avec les équipes techniques de la DSI
 - Audit et vérification terrain
 - Escalade et remontée d'incidents structurée
 - Rigueur dans la tenue d'un inventaire à jour
