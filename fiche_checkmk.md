@@ -1,8 +1,23 @@
 #  Supervision Réseau avec Checkmk
 
 > **Administration et Optimisation de la Supervision Réseau**
-> Direction des Systèmes d'Information (DSI) — Mairie (collectivité territoriale)
+> Direction des Systèmes d'Information (DSI) — Mairie
 
+# Sommaire
+
+- [2. Compétences et missions réalisées](#2-compétences-et-missions-réalisées)
+  - [2.1 — Reprise et assainissement de l'existant](#21--reprise-et-assainissement-de-lexistant)
+  - [2.2 — Gestion du cycle de vie des hôtes](#22--gestion-du-cycle-de-vie-des-hôtes)
+  - [2.3 — Implémentation des protocoles de supervision](#23--implémentation-des-protocoles-de-supervision)
+  - [2.4 — Exploitation et Maintien en Condition Opérationnelle (MCO)](#24--exploitation-et-maintien-en-condition-opérationnelle-mco)
+- [3. Difficultés rencontrées et solutions apportées](#3-difficultés-rencontrées-et-solutions-apportées)
+  - [3.1 — Faux positifs sur les bornes Wi-Fi en adressage dynamique](#31--faux-positifs-sur-les-bornes-wi-fi-en-adressage-dynamique)
+  - [3.2 — Inventaire initial incomplet et non fiabilisé](#32--inventaire-initial-incomplet-et-non-fiabilisé)
+- [4. Impact pour la collectivité](#4-impact-pour-la-collectivité)
+- [5. Limites et perspectives](#5-limites-et-perspectives)
+- [6. Compétences mobilisées](#6-compétences-mobilisées)
+  - [Compétences techniques](#compétences-techniques)
+  - [Compétences transversales](#compétences-transversales)
 ---
 
 ## 2. Compétences et missions réalisées
