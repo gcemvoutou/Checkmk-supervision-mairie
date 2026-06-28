@@ -15,3 +15,5 @@ L'outil retenu est **Checkmk Raw Edition (CRE)**, déployé sur un serveur Linux
 
 <img src="images/1.png" alt="Dashboard Checkmk - Vue générale" width="900">
 
+👉 [Voir la fiche technique complète](https://github.com/gcemvoutou/Checkmk-supervision-mairie/blob/main/fiche_checkmk.md)
+
