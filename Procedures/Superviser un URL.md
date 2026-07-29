@@ -37,6 +37,8 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
    * **Name (nécessaire) :** Saisissez le nom de domaine (ex: `reference.gestion...ligeo-archives.com`)
    * **URL :** Renseignez l'URL complète avec le protocole HTTPS :  
      `https://reference.gestion...ligeo-archives.com`
+     
+![Configuration de la regle](images/4.png)
 
 5. Dans la section **Standard settings for all endpoints** :
    * Cochez **Status code**.
