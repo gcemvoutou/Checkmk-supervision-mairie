@@ -34,7 +34,7 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
 3. Cliquez sur **Créer une règle dans le dossier** (*Create rule in folder* / *Add rule*).
 4. Dans la section **Valeur** (*Value*) > **HTTP web service endpoints to monitor** :
    * **Prefix :** Laissez `Use "HTTP(S)" as service name prefix`
-   * **Name (nécessaire) :** Saisissez le nom de domaine (ex: `reference.gestion...ligeo-archives.com`)
+   * **Nom du service :** Saisissez le nom de domaine (ex: `reference.gestion...ligeo-archives.com`)
    * **URL :** Renseignez l'URL complète avec le protocole HTTPS :  
      `https://reference.gestion...ligeo-archives.com`
      
