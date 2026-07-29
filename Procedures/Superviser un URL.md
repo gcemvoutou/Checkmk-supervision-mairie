@@ -42,7 +42,7 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
 
 5. Dans la section **Standard settings for all endpoints** :
    * Cochez **Status code**.
-     
+  ![Configuration de la regle bis](images/5.png)   
      > 
 > **Pourquoi vérifier le Status Code plutôt qu'un simple ping ?**  
 > Un serveur peut être joignable sur le réseau tout en renvoyant une erreur web (ex: *500 Erreur interne* ou *404 Introuvable*). Tester le code de statut HTTP garantit que l'application web sous-jacente est réellement en ligne et fonctionnelle pour les utilisateurs.
