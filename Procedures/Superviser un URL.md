@@ -61,11 +61,13 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
 
 ![Configuration de la regle bis](images/6.png)   
 
+> **À quoi sert l'option "Hôtes explicites" ?**  
+> Dans Checkmk, une règle s'applique par défaut à tous les hôtes de l'annuaire. Indiquer un hôte explicite (ex: `URL-Ligeo-Gestion`) permet d'isoler la règle pour qu'elle ne s'exécute **que sur l'hôte désigné** .
 ---
 
 ### Étape 3 : Validation et Déploiement
 
 1. Cliquez sur **Enregistrer** (*Save*) en haut à gauche.
 2. Cliquez sur l'icône jaune **Modifications en attente** (*Pending Changes*) en haut à droite, puis sur **Activer sur les sites sélectionnés** (*Activate on selected sites*).
-3. Rendez-vous dans la vue de l'hôte pour vérifier que le service web remonte bien au statut **OK** (Vert).
+3. Rendez-vous dans la vue de l'hôte pour vérifier que le service web remonte bien au statut **UP** (Vert).
 ![Vérification](images/8.png)   
