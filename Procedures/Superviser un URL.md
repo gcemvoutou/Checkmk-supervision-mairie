@@ -39,12 +39,12 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
 5. Dans la section **Standard settings for all endpoints** :
    * Cochez **Status code**.
      
-     > [!NOTE]
+     > 
 > **Pourquoi vérifier le Status Code plutôt qu'un simple ping ?**  
 > Un serveur peut être joignable sur le réseau tout en renvoyant une erreur web (ex: *500 Erreur interne* ou *404 Introuvable*). Tester le code de statut HTTP garantit que l'application web sous-jacente est réellement en ligne et fonctionnelle pour les utilisateurs.
    * Dans **Expected**, renseignez **`200`**.
 
-> [!NOTE]
+ > 
 > **Pourquoi le code `200` ?**  
 > Lorsqu'un serveur web répond correctement, il renvoie le code **`200 OK`**. En activant cette option, on demande à Checkmk de vérifier que l'URL répond avec ce code spécifique. 
 > * Si la page répond `200`, la supervision passe au **VERT (OK)**.
