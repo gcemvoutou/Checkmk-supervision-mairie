@@ -42,6 +42,7 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
 
 5. Dans la section **Standard settings for all endpoints** :
    * Cochez **Status code**.
+  
   ![Configuration de la regle bis](images/5.png)   
      > 
 > **Pourquoi vérifier le Status Code plutôt qu'un simple ping ?**  
