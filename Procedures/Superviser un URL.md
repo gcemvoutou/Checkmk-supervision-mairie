@@ -59,7 +59,7 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
    * Cochez la case **Hôtes explicites**.
    * Sélectionnez l'hôte créé à l'étape 1 : `URL-Ligeo-Gestion`.
 
-![Configuration de la regle bis](images/7.png)   
+![Configuration de la regle bis](images/6.png)   
 
 ---
 
