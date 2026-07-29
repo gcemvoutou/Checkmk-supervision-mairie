@@ -68,3 +68,4 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
 1. Cliquez sur **Enregistrer** (*Save*) en haut à gauche.
 2. Cliquez sur l'icône jaune **Modifications en attente** (*Pending Changes*) en haut à droite, puis sur **Activer sur les sites sélectionnés** (*Activate on selected sites*).
 3. Rendez-vous dans la vue de l'hôte pour vérifier que le service web remonte bien au statut **OK** (Vert).
+![Vérification](images/8.png)   
