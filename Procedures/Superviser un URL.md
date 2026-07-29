@@ -1,6 +1,6 @@
 # Procédure : Supervision de l'URL Ligeo Gestion dans Checkmk
 
-Cette procédure détaille la création de l'hôte et la configuration de la règle `Check HTTP web service` pour l'application **Ligeo Gestion**, conformément aux standards du service informatique.
+Cette procédure détaille la création de l'hôte et la configuration de la règle `Check HTTP web service` pour l'application **Ligeo Gestion**, conformément aux recommandations du service informatique.
 
 ---
 
@@ -17,36 +17,44 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
 
 ### Étape 1 : Création de l'hôte dédié à l'URL
 
-1. Dans Checkmk, allez dans **Setup** > **Hosts** > **Add host** (dans le dossier `Surveillance par url http`).
-2. Renseignez les informations de l'hôte :
-   * **Nom de l'hôte :** `URL-Ligeo-Gestion` (ou le nom FQDN du site)
+1. Dans Checkmk, allez dans le menu **Configuration** (*Setup*) > **Hôtes** (*Hosts*) > **Ajouter un hôte** (*Add host*) dans le dossier `Surveillance par url http`.
+2. Dans **Paramètres de base**, renseignez le nom :
+   * **Nom de l'hôte :** `URL-Ligeo-Gestion`
 3. Les paramètres réseau (`No IP`) et les étiquettes (`host:NoPing`) sont automatiquement hérités du dossier parent.
-4. Cliquez sur **Save & exit**.
+4. Cliquez sur **Sauvegarder et quitter** (*Save & exit*).
 
 ---
 
-### Étape 2 : Configuration de la règle `Check HTTP web service`
+### Étape 2 : Configuration de la règle de contrôle HTTP
 
-1. Allez dans **Setup** > **Services** > **HTTP, TCP, Email, ...**
+1. Allez dans **Configuration** (*Setup*) > **Services** > **HTTP, TCP, Email, ...**
 2. Dans la section **Networking**, cliquez sur **Check HTTP web service**.
-3. Cliquez sur **Add rule** (ou *Create rule in folder*).
-4. Dans la section **Value** > **HTTP web service endpoints to monitor** :
+3. Cliquez sur **Créer une règle dans le dossier** (*Create rule in folder* / *Add rule*).
+4. Dans la section **Valeur** (*Value*) > **HTTP web service endpoints to monitor** :
    * **Prefix :** Laissez `Use "HTTP(S)" as service name prefix`
-   * **Name (required) :** Indiquez le nom de domaine (ex: `reference.gestion...ligeo-archives.com`)
-   * **URL :** Renseignez l'URL complète avec le protocole :  
+   * **Name (nécessaire) :** Saisissez le nom de domaine (ex: `reference.gestion...ligeo-archives.com`)
+   * **URL :** Renseignez l'URL complète avec le protocole HTTPS :  
      `https://reference.gestion...ligeo-archives.com`
 
 5. Dans la section **Standard settings for all endpoints** :
    * Cochez **Status code**.
-   * Dans **Expected**, renseignez **`200`** *(ou `401` si le site renvoie une mire d'authentification sans identifiants)*.
+   * Dans **Expected**, renseignez **`200`**.
+
+> [!NOTE]
+> **Pourquoi le code `200` ?**  
+> Lorsqu'un serveur web répond correctement, il renvoie le code **`200 OK`**. En activant cette option, vous demandez à Checkmk de vérifier que l'URL répond avec ce code spécifique. 
+> * Si la page répond `200`, la supervision passe au **VERT (OK)**.
+> * Si la page renvoie une erreur (ex: `404` *Non trouvé* ou `500` *Erreur serveur*), Checkmk bascule immédiatement au **ROUGE (CRITICAL)**.
+> *(Cas particulier : si le site affiche une mire d'authentification HTTP sans identifiants configurés, le serveur renverra un code `401 Unauthorized`. Il faudra alors saisir `401` dans Expected pour valider la réponse du serveur).*
 
 6. Dans la section **Conditions** (en bas de page) :
-   * Cochez **Explicit hosts** et sélectionnez l'hôte créé à l'étape 1 (`URL-Ligeo-Gestion`).
+   * Cochez la case **Hôtes explicites**.
+   * Sélectionnez l'hôte créé à l'étape 1 : `URL-Ligeo-Gestion`.
 
 ---
 
 ### Étape 3 : Validation et Déploiement
 
-1. Cliquez sur **Save** en haut à gauche.
-2. Cliquez sur l'icône jaune **Pending Changes** (en haut à droite), puis sur **Activate on selected sites**.
-3. Accédez à la vue de l'hôte pour vérifier que le service web remonte bien au statut **OK** (Vert).
+1. Cliquez sur **Enregistrer** (*Save*) en haut à gauche.
+2. Cliquez sur l'icône jaune **Modifications en attente** (*Pending Changes*) en haut à droite, puis sur **Activer sur les sites sélectionnés** (*Activate on selected sites*).
+3. Rendez-vous dans la vue de l'hôte pour vérifier que le service web remonte bien au statut **OK** (Vert).
