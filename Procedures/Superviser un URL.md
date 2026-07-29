@@ -31,7 +31,7 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
 
 1. Allez dans **Configuration** (*Setup*) > **Services** > **HTTP, TCP, Email, ...**
 2. Dans la section **Networking**, cliquez sur **Check HTTP web service**.
-3. Cliquez sur **Créer une règle dans le dossier** (*Create rule in folder* / *Add rule*).
+3. Cliquez sur **Ajouter une règle** (*Create rule in folder* / *Add rule*).
 4. Dans la section **Valeur** (*Value*) > **HTTP web service endpoints to monitor** :
    * **Prefix :** Laissez `Use "HTTP(S)" as service name prefix`
    * **Nom du service :** Saisissez le nom de domaine (ex: `reference.gestion...ligeo-archives.com`)
