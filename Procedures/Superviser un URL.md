@@ -17,7 +17,7 @@ Cette procédure détaille la création de l'hôte et la configuration de la rè
 
 ### Étape 1 : Création de l'hôte dédié à l'URL
 
-1. Dans Checkmk, allez dans le menu **Configuration** (*Setup*) > **Hôtes** (*Hosts*) > **Ajouter un hôte** (*Add host*) dans le dossier `Surveillance par url http`.
+1. Dans Checkmk, allez dans le menu **Configuration** > **Hôtes** > **Ajouter un hôte** dans le dossier `Surveillance par url http`.
 2. Dans **Paramètres de base**, renseignez le nom :
    * **Nom de l'hôte :** `URL-Ligeo-Gestion`
 3. Les paramètres réseau (`No IP`) et les étiquettes (`host:NoPing`) sont automatiquement hérités du dossier parent.
