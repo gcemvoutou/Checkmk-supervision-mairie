@@ -2,7 +2,7 @@
 
 ## 1. Contexte
 
-Le service dispose d'une télévision inutilisée, non connectée au réseau. L'objectif est de la transformer en **panneau d'affichage de supervision** (type panneau de gare), affichant en permanence le tableau de bord CheckMK, 24h/24, sans interaction ni redémarrage intempestif.
+Le service dispose d'une télévision inutilisée, non connectée au réseau. L'objectif est de la transformer en **panneau d'affichage de supervision** , affichant en permanence le tableau de bord CheckMK, 24h/24, sans interaction ni redémarrage intempestif.
 
 > ℹ️ **Note**
 > La solution repose entièrement sur des outils open source (Ubuntu Server, Openbox, Chromium), sans licence à payer, cohérent avec le choix de Checkmk Raw Edition (CRE) déjà en place sur ce projet.
