@@ -1,258 +1,249 @@
-# PROCÉDURE — Déploiement Wallboard CheckMK sur Dell OptiPlex 3020M (Ubuntu Desktop 24.04 LTS)
+# PROCÉDURE DÉTAILLÉE — Déploiement Wallboard CheckMK sur Dell OptiPlex 3020M
 
-> Projet : Bureau du Desk — Mairie de Saint-Égrève
-> Auteur : Clara — Apprentie BTS SIO SISR
-> Matériel : Dell OptiPlex 3020M, Intel Core i3
-> ⚠️ Version Desktop demandée par le responsable (pas Server, pour rester distinct du serveur CheckMK existant déjà en Ubuntu Server)
+> Écrite pour quelqu'un qui n'a jamais fait ça. Chaque commande est expliquée : ce qu'elle fait, pourquoi on la lance, et à quoi t'attendre comme résultat.
+> Matériel : Dell OptiPlex 3020M, Intel Core i3, 7,9 Go de RAM
+> OS : Ubuntu Desktop 24.04 LTS
 
-## Mon conseil sur l'approche kiosque
+## Petit lexique avant de commencer
 
-Vu qu'on part sur Desktop (donc GNOME déjà installé, contrairement à l'approche Server + Xorg/Openbox minimal qu'on avait prévue avant), autant **garder GNOME tel quel et configurer le kiosque par-dessus** plutôt que de se battre pour l'alléger :
-- Retirer GNOME reviendrait presque à réinstaller un Server, ce qui contredit la demande du responsable
-- GNOME sur un i3 avec au moins 4 Go de RAM tourne très bien pour un usage kiosque simple (un seul Chromium plein écran, pas de multitâche)
-- L'autologin GDM + la désactivation des économiseurs d'écran/veille + un lancement automatique de Chromium au démarrage de session suffisent largement à obtenir le même résultat "panneau de gare" qu'avec Openbox, avec moins de configuration bas niveau à gérer
+Quelques mots que tu vas croiser tout du long, définis une bonne fois pour toutes :
+
+- **Terminal** : une fenêtre où on tape des commandes en texte au lieu de cliquer avec la souris. Sur Ubuntu, tu l'ouvres avec le raccourci `Ctrl + Alt + T`.
+- **`sudo`** : à mettre devant une commande pour dire "fais-le avec les droits d'administrateur". Le système va te demander ton mot de passe la première fois, puis plus pendant quelques minutes.
+- **Kiosque (mode kiosque)** : un navigateur affiché en plein écran, sans barre d'adresse, sans onglets, sans rien d'autre — comme un panneau d'affichage figé sur une seule page.
+- **DHCP** : le mode par défaut où c'est le réseau qui attribue automatiquement une adresse IP à ta machine quand elle démarre (comme quand ton téléphone se connecte au wifi sans que tu configures rien).
+- **IP fixe / réservation DHCP** : au lieu de laisser le réseau donner une IP au hasard, on demande à ce que la machine ait toujours la même adresse. Utile pour que l'admin réseau la retrouve facilement dans ses outils.
+- **SSH** : une façon de se connecter à distance à une machine, en tapant des commandes, sans être physiquement devant l'écran/clavier de cette machine.
+- **Certificat / TLS / HTTPS** : quand un site est en HTTPS (le petit cadenas dans le navigateur), la connexion est chiffrée, et un "certificat" sert à prouver que le site est bien celui qu'il prétend être. Un pare-feu d'entreprise (comme le WatchGuard de la mairie) peut "intercepter" ces connexions pour les vérifier, ce qui demande d'installer un certificat spécial sur la machine pour qu'elle fasse confiance à cette interception.
+- **Snap** : un format d'installation de logiciels sur Ubuntu (comme un `.exe` sur Windows, mais en plus confiné). Chromium s'installe via ce système.
+
+---
 
 ## Sommaire
-1. [Vue d'ensemble & prérequis](#1-vue-densemble--prérequis)
-2. [Vérifications matérielles sur place](#2-vérifications-matérielles-sur-place)
-3. [Création de la clé USB bootable](#3-création-de-la-clé-usb-bootable)
-4. [Remise à zéro du SSD avant installation](#4-remise-à-zéro-du-ssd-avant-installation)
-5. [Installation d'Ubuntu Desktop 24.04 LTS](#5-installation-dubuntu-desktop-2404-lts)
-6. [Réseau — coordination avec l'admin réseau](#6-réseau--coordination-avec-ladmin-réseau)
-7. [Import du certificat WatchGuard (rootCA)](#7-import-du-certificat-watchguard-rootca)
-8. [Installation de Chromium](#8-installation-de-chromium)
-9. [Configuration du kiosque sur GNOME](#9-configuration-du-kiosque-sur-gnome)
-10. [Résilience : anti-veille, watchdog, démarrage auto](#10-résilience--anti-veille-watchdog-démarrage-auto)
-11. [Compte CheckMK dédié "kiosque"](#11-compte-checkmk-dédié-kiosque)
-12. [Sécurité (SSH / pare-feu)](#12-sécurité-ssh--pare-feu)
-13. [Tests de recette](#13-tests-de-recette)
-14. [Suggestions / ajouts](#14-suggestions--ajouts)
+1. [Ce qu'il te faut avant de commencer](#1-ce-quil-te-faut-avant-de-commencer)
+2. [Créer la clé USB bootable](#2-créer-la-clé-usb-bootable)
+3. [Effacer le disque dur de l'ancien PC](#3-effacer-le-disque-dur-de-lancien-pc)
+4. [Installer Ubuntu Desktop](#4-installer-ubuntu-desktop)
+5. [Premiers pas : ouvrir un terminal et se repérer](#5-premiers-pas--ouvrir-un-terminal-et-se-repérer)
+6. [Connecter la machine au réseau](#6-connecter-la-machine-au-réseau)
+7. [Installer le certificat de l'entreprise](#7-installer-le-certificat-de-lentreprise)
+8. [Installer le navigateur Chromium](#8-installer-le-navigateur-chromium)
+9. [Configurer le mode kiosque](#9-configurer-le-mode-kiosque)
+10. [Empêcher l'écran de se mettre en veille](#10-empêcher-lécran-de-se-mettre-en-veille)
+11. [Rendre le système résistant aux pannes](#11-rendre-le-système-résistant-aux-pannes)
+12. [Créer le compte CheckMK dédié](#12-créer-le-compte-checkmk-dédié)
+13. [Sécuriser l'accès à distance](#13-sécuriser-laccès-à-distance)
+14. [Fixer l'adresse IP (en toute fin de projet)](#14-fixer-ladresse-ip-en-toute-fin-de-projet)
+15. [Vérifier que tout fonctionne (recette)](#15-vérifier-que-tout-fonctionne-recette)
 
 ---
 
-## 1. Vue d'ensemble & prérequis
+## 1. Ce qu'il te faut avant de commencer
 
-**Matériel :**
-- [ ] Dell OptiPlex 3020M (Intel Core i3), SSD propre
-- [ ] Câble HDMI adapté
-- [ ] Clé USB ≥ 8 Go (Desktop est plus lourd que Server, prévois large)
-- [ ] Câble Ethernet
-- [ ] Clavier/souris temporaire pour l'installation
+Fais cette liste avant de te déplacer, pour ne rien découvrir sur place :
 
-**À récupérer avant de te déplacer sur site :**
-- [ ] ISO **Ubuntu Desktop 24.04 LTS** (et non plus Server) — https://ubuntu.com/download/desktop
-- [ ] URL du dashboard : `http://192.168.198.21/monitoring`
-- [ ] Le fichier **`certificate.crt`** trouvé sur le partage réseau (`K:\03_Systemes_Information\...`) — copié sur une clé USB
-- [ ] Confirmation avec Zakk que c'est bien le bon rootCA (message rapide, cf. section 6)
+- [ ] Une **clé USB vide** d'au moins 8 Go (elle va être totalement effacée, donc pas de données importantes dessus)
+- [ ] Un fichier **image disque** (fichier `.iso`) d'Ubuntu Desktop 24.04 LTS, à télécharger sur https://ubuntu.com/download/desktop — c'est le fichier qui contient tout le système à installer
+- [ ] Le fichier de **certificat** trouvé sur le partage réseau (`certificate.crt`) — copie-le aussi sur ta clé USB, dans un petit dossier séparé (ex. `certif/`), pour l'avoir sous la main
+- [ ] Un câble HDMI et un câble Ethernet
+- [ ] Un clavier et une souris (temporaires, juste pour l'installation — tu n'en auras plus besoin après)
+- [ ] L'URL du dashboard à afficher : `http://192.168.198.21/monitoring`
 
 ---
 
-## 2. Vérifications matérielles sur place
+## 2. Créer la clé USB bootable
 
-Avant même de lancer l'installation, vérifie les specs réelles de la machine — ça conditionne si GNOME tournera confortablement ou si on devra alléger certains réglages visuels.
+**Ce qu'on fait ici et pourquoi :** on transforme la clé USB en disque de démarrage, pour que le PC puisse "booter" (démarrer) dessus au lieu de démarrer sur son disque dur habituel. C'est comme ça qu'on va pouvoir installer Ubuntu.
 
-Si tu peux déjà booter sur un live USB Ubuntu ou dans un BIOS qui affiche les specs :
-- **RAM** : idéalement 4 Go minimum pour GNOME + Chromium en kiosque confortablement ; en dessous, ça peut ramer un peu mais reste jouable pour un usage à un seul onglet fixe
-- **Stockage** : le SSD fourni doit être détecté correctement (vérifie dans le BIOS qu'il apparaît bien)
+### Si tu fais ça depuis un PC Windows (le plus simple)
 
-Une fois l'OS installé, tu pourras confirmer avec :
-```bash
-free -h
-df -h
-```
-
-> 💡 Si jamais la RAM s'avère limite (2 Go ou moins), dis-le-moi, on ajoutera une désactivation de certains effets visuels GNOME (`gsettings set org.gnome.desktop.interface enable-animations false`) pour alléger la charge.
-
----
-
-## 3. Création de la clé USB bootable
-
-Identique à ce qu'on a déjà fait, juste avec l'ISO **Desktop** cette fois (plus volumineuse, prévois une clé de 8 Go minimum) :
-
-**Linux (dd) :**
-```bash
-lsblk
-sudo umount /dev/sdX*
-sudo dd if=ubuntu-24.04-desktop-amd64.iso of=/dev/sdX bs=4M status=progress oflag=sync
-```
-
-**Windows (Rufus) :**
-1. Sélectionne la clé USB
-2. Sélectionne l'ISO Ubuntu **Desktop** 24.04
-3. Schéma de partition : GPT, Système de destination : UEFI (non CSM)
-4. Démarrer
-
-> 💡 Pense aussi à copier le fichier `certificate.crt` sur cette même clé USB (dans un dossier à part, ex. `certif/`), ça t'évite d'avoir besoin d'une deuxième clé sur place.
+1. Télécharge le logiciel **Rufus** (gratuit, pas besoin de l'installer, juste double-cliquer dessus) : https://rufus.ie/
+2. Branche ta clé USB
+3. Ouvre Rufus. Dans le champ "Périphérique", vérifie qu'il a bien sélectionné ta clé USB (attention si tu as plusieurs clés/disques branchés, ne te trompe pas — ça va tout effacer)
+4. Clique sur "Sélection" et choisis ton fichier `.iso` d'Ubuntu Desktop téléchargé
+5. Laisse les autres réglages par défaut (Rufus les ajuste automatiquement selon l'ISO)
+6. Clique sur le bouton **"DÉMARRER"**
+7. Une fenêtre peut te demander de confirmer que tu veux effacer la clé — clique sur "OK" (vérifie une dernière fois que c'est bien la bonne clé)
+8. Attends la fin (une barre de progression s'affiche), ça prend généralement 5 à 10 minutes
 
 ---
 
-## 4. Remise à zéro du SSD avant installation
+## 3. Effacer le disque dur de l'ancien PC
 
-Le cahier des charges précise que le SSD doit arriver "effacé et propre" (fourni par ton collègue) — mais autant vérifier/forcer un vrai nettoyage toi-même avant l'installation, surtout si le disque a potentiellement déjà servi (ancien poste recyclé, test précédent, etc.). Deux niveaux possibles selon ton besoin :
+**Pourquoi cette étape :** ce PC (Dell OptiPlex 3020M) a déjà été utilisé avant, et tu ne sais pas ce qu'il reste dessus comme données de l'ancien utilisateur. Avant d'installer un nouveau système, on va nettoyer complètement le disque.
 
-### Option A — Suffisant dans la grande majorité des cas : laisser l'installeur Ubuntu tout gérer
+**Point important : tu ne peux pas faire ça depuis Windows si Windows est le système actuellement démarré sur ce disque.** On ne peut pas effacer le sol sur lequel on est en train de marcher. Il faut d'abord démarrer sur la clé USB qu'on vient de préparer, dans un mode qui ne touche pas encore au disque, pour pouvoir l'effacer depuis là.
 
-L'installeur Ubuntu Desktop propose une option **"Effacer le disque et installer Ubuntu"** (vue en section 5, étape 6) qui reformate entièrement le disque et recrée les partitions proprement. Pour un disque "propre" comme annoncé, **c'est largement suffisant**, pas besoin d'étape manuelle en plus.
+### 3.1 — Démarrer sur la clé USB
 
-### Option B — Si tu veux repartir d'un disque vraiment "à blanc" (ex. données résiduelles d'un ancien usage, ou simplement par principe de prudence avant un déploiement en prod)
+1. Éteins le PC s'il est allumé
+2. Branche la clé USB
+3. Allume le PC et appuie plusieurs fois sur la touche qui ouvre le menu de démarrage — sur les PC Dell, c'est généralement **F12** (appuie dès que le logo Dell apparaît)
+4. Un petit menu s'affiche avec la liste des disques de démarrage disponibles — choisis ta clé USB dans la liste (elle apparaît généralement avec son nom de marque, ex. "SanDisk USB Device")
+5. Le PC démarre alors sur Ubuntu depuis la clé, et affiche un écran avec deux gros boutons : **"Essayer Ubuntu"** et **"Installer Ubuntu"**
+6. Clique sur **"Essayer Ubuntu"** (pas "Installer" pour l'instant) — ça lance un Ubuntu temporaire en mémoire, sans rien installer sur le disque dur, ce qui nous permet justement de le manipuler librement
 
-1. Démarre sur la clé USB Ubuntu, choisis **"Essayer Ubuntu"** (mode live, sans installer) pour avoir un environnement de travail
-2. Ouvre un terminal (`Ctrl+Alt+T`)
-3. Identifie le disque à effacer :
+### 3.2 — Ouvrir un terminal et identifier le disque
+
+Une fois sur le bureau Ubuntu "d'essai", ouvre un terminal avec `Ctrl + Alt + T`.
+
+Tape :
 ```bash
 lsblk
 ```
-Repère le bon disque (ex. `/dev/sda` ou `/dev/nvme0n1` selon le type de SSD) — ⚠️ vérifie bien la taille affichée pour ne pas te tromper de disque.
+Ça liste tous les disques. Cette fois, cherche le **disque interne** du PC (pas la clé USB sur laquelle tu as démarré) — regarde la taille pour l'identifier (le SSD interne, souvent nommé `sda`, sera d'une taille différente de ta clé USB).
 
-4. **Pour un SSD SATA classique**, un effacement rapide des tables de partitions suffit (pas besoin d'écraser tout le disque bit par bit comme sur un vieux HDD — sur SSD ça userait le disque pour rien) :
+### 3.3 — Effacer le disque
+
+Cette commande "efface les tables de partitions" du disque — en clair, elle supprime toute trace de l'organisation précédente du disque (les partitions Windows éventuelles, les données, etc.), pour repartir sur une base neutre :
+
 ```bash
 sudo wipefs -a /dev/sda
 ```
+Remplace `/dev/sda` par le nom réel du disque interne que tu as identifié à l'étape précédente. `sudo` te demandera peut-être un mot de passe — sur ce mode "essai", il n'y en a généralement pas, appuie juste sur Entrée si demandé.
 
-5. **Alternative plus poussée : secure erase natif du SSD** (efface électriquement toutes les cellules mémoire, la méthode la plus propre spécifiquement pour un SSD) :
-```bash
-sudo apt install -y hdparm
-sudo hdparm --user-master u --security-set-pass p /dev/sda
-sudo hdparm --user-master u --security-erase p /dev/sda
-```
-⚠️ Cette commande peut échouer si le SSD a un "security freeze" activé au boot (fréquent) — dans ce cas il faut parfois passer par une mise en veille/réveil du disque avant de relancer la commande. Pas obligatoire pour ton usage, l'option A ou le `wipefs` suffisent largement pour un wallboard.
+✔️ Une fois la commande terminée (ça prend quelques secondes), le disque est prêt à recevoir une toute nouvelle installation, sans rien de l'ancien système.
 
-6. Redémarre ensuite normalement sur la clé USB pour lancer la vraie installation (section 5).
+### 3.4 — Relancer l'installation
 
-> ⚠️ **Cas de ce PC précis (Dell OptiPlex 3020M déjà utilisé, état du SSD inconnu) : pars sur l'option B.** Comme la machine a servi avant et que tu ne sais pas ce qu'il reste dessus (données du précédent utilisateur), un vrai effacement depuis l'environnement live est plus sûr qu'un simple reformatage — d'autant plus pour un poste municipal où la confidentialité des anciennes données compte.
->
-> ⚠️ **Important : impossible de faire cet effacement depuis PowerShell/Windows si Windows est encore installé et démarré sur ce disque.** Tu ne peux pas effacer le disque système sur lequel l'OS est actuellement en cours d'exécution — `diskpart clean` ou `Clear-Disk` refuseront ou échoueront. Il faut obligatoirement démarrer sur la clé USB Ubuntu en mode **"Essayer Ubuntu"** (live, sans installer), et effectuer l'effacement (étapes 2 à 5 ci-dessus) depuis cet environnement live, où le disque interne n'est plus le système actif et peut donc être manipulé librement.
+Redémarre le PC (menu en haut à droite du bureau → icône d'alimentation → Redémarrer), retire la clé USB pendant le redémarrage si le PC te le demande, puis remets-la et refais l'étape "démarrer sur la clé USB" — mais cette fois, choisis **"Installer Ubuntu"** au lieu de "Essayer Ubuntu".
 
 ---
 
-## 5. Installation d'Ubuntu Desktop 24.04 LTS
+## 4. Installer Ubuntu Desktop
 
-1. Boot sur la clé USB (touche de boot selon le modèle Dell — souvent `F12` sur les OptiPlex)
-2. Choisis **"Installer Ubuntu"** (pas "Essayer Ubuntu", même si tu peux passer par le mode Essai pour vérifier que tout est détecté avant de lancer l'install pour de vrai — pratique sur du matériel que tu ne connais pas encore)
-3. Disposition du clavier : French
-4. Type d'installation : **Installation normale** (pas "minimale", ici on garde GNOME complet volontairement)
-5. Décoche "Télécharger les mises à jour pendant l'installation" si tu veux gagner du temps (tu feras un `apt update` après), ou coche-la si le réseau est bon ce jour-là
-6. Effacer le disque et installer Ubuntu (le SSD est propre, pas de dual-boot à gérer)
-7. Fuseau horaire : Europe/Paris
-8. Compte utilisateur : nom `checkmk-kiosk`, coche **"Se connecter automatiquement"** ✔️ (ça configurera l'autologin GDM directement à l'installation, tu n'auras pas à le faire manuellement après)
-9. Laisse l'installation se terminer, retire la clé USB, redémarre
+Tu es maintenant dans l'installeur pour de vrai. Suis les écrans dans l'ordre :
 
-✔️ **Vérification** : au redémarrage, la session doit s'ouvrir automatiquement sur le bureau GNOME sans demander de mot de passe.
+1. **Disposition du clavier** : choisis "French" (clavier français, AZERTY)
+2. **Type d'installation** : choisis **"Installation normale"** (celle qui installe le bureau complet avec les applications de base — c'est ce qu'on veut, pas la version "minimale")
+3. Tu peux décocher "Télécharger les mises à jour pendant l'installation" pour aller plus vite (tu les feras après)
+4. **Type d'installation du disque** : choisis **"Effacer le disque et installer Ubuntu"** — comme on a déjà nettoyé le disque à l'étape 3, ça va juste créer les nouvelles partitions proprement dessus
+5. Une fenêtre de confirmation s'affiche, listant ce qui va être fait sur le disque — clique sur "Installer maintenant" puis "Continuer"
+6. **Fuseau horaire** : Europe/Paris (généralement détecté automatiquement)
+7. **Créer ton compte utilisateur** :
+   - Ton nom : ce que tu veux (ex. "Wallboard Desk")
+   - Nom de la machine (ordinateur) : `wallboard-desk`
+   - Nom d'utilisateur : `checkmk-kiosk`
+   - Mot de passe : choisis-en un solide, note-le bien quelque part de sûr
+   - **Coche impérativement la case "Se connecter automatiquement"** ✔️ — c'est ce qui permettra à la machine de démarrer directement sur le bureau sans qu'on ait à taper de mot de passe à chaque redémarrage, indispensable pour un affichage autonome
+8. Laisse l'installation se dérouler (ça prend en général 15 à 25 minutes selon la machine et la connexion réseau)
+9. À la fin, un message te demande de retirer le support d'installation (ta clé USB) et d'appuyer sur Entrée pour redémarrer
+
+✔️ **Vérification :** à ce redémarrage, le bureau Ubuntu doit s'afficher directement, sans écran de connexion demandant un mot de passe. Si un écran de connexion apparaît quand même, ce n'est pas grave, on réglera l'autologin plus tard (section 11) si besoin.
 
 ---
 
-## 6. Réseau — coordination avec l'admin réseau
+## 5. Premiers pas : ouvrir un terminal et se repérer
 
-### 6.1 — Récupérer la MAC réelle
+À partir de maintenant, presque toutes les manipulations se font dans un terminal. Voici comment t'y retrouver :
+
+**Ouvrir un terminal :** raccourci clavier `Ctrl + Alt + T`, ou clique sur l'icône "Activités" en haut à gauche, tape "Terminal", puis clique dessus.
+
+**Comment lire une commande dans ce document :** chaque bloc gris est à copier-coller (ou taper) tel quel dans le terminal, puis valider avec la touche Entrée. Par exemple :
 ```bash
-ip link show
+ls
 ```
-(Ouvre un terminal via le raccourci GNOME `Ctrl+Alt+T` ou depuis les applications)
+Cette commande liste les fichiers du dossier où tu te trouves. Pas besoin de la lancer maintenant, c'est juste un exemple.
 
-### 6.2 — Message à Zakk (réservation DHCP)
+**Le mot de passe ne s'affiche pas quand tu le tapes** (ni étoiles, ni points) — c'est normal, une sécurité de Linux. Tape-le à l'aveugle et valide avec Entrée.
 
-> Objet : Wallboard bureau du desk — réservation DHCP
->
-> Salut Zakk,
->
-> Réservation DHCP fixe pour la machine `wallboard-desk` (Dell OptiPlex 3020M) :
-> - Adresse MAC : `xx:xx:xx:xx:xx:xx`
-> - Emplacement : bureau du desk
-> - Usage : accès HTTP vers `192.168.198.21` (CheckMK) + SSH entrant pour maintenance depuis le VLAN IT
->
-> Merci !
+**Copier-coller dans le terminal :** le raccourci classique `Ctrl+V` ne fonctionne pas toujours dans un terminal Linux. Utilise plutôt `Ctrl + Shift + V`, ou fais un clic droit → "Coller".
 
-> 💡 **Tu n'as pas besoin d'attendre la confirmation de Zakk pour avancer.** Laisse la machine en DHCP dynamique classique pendant toute la phase de configuration (sections 7 à 12 : certificat, Chromium, kiosque GNOME, résilience). Rien de tout ça ne dépend d'une IP fixe. Ne bascule sur l'IP réservée/fixe (6.3 ci-dessous) qu'en toute fin de projet, une fois tout le reste validé et juste avant la recette finale — c'est à ce moment-là que ça devient utile, pour que l'admin réseau retrouve toujours la même adresse dans ses logs/pare-feu une fois la machine posée définitivement.
+---
 
-### 6.3 — IP fixe (à faire en toute fin de projet, une fois la réservation DHCP confirmée ; sinon config manuelle via NetworkManager)
+## 6. Connecter la machine au réseau
 
-Sur Desktop, la config réseau passe par **NetworkManager** plutôt que netplan brut :
+**Ce qu'on fait :** on branche la machine au réseau de la mairie pour qu'elle puisse accéder à CheckMK et à internet (pour les mises à jour).
+
+1. Branche le câble Ethernet entre le PC et une prise réseau murale (ou le switch)
+2. Ubuntu détecte généralement automatiquement la connexion et attribue une adresse IP toute seule (en DHCP, la valeur par défaut)
+
+**Pour vérifier que ça a marché**, ouvre un terminal et tape :
 ```bash
-nmcli connection show
-nmcli connection modify "Wired connection 1" ipv4.addresses 192.168.198.XX/24 ipv4.gateway 192.168.198.1 ipv4.dns 192.168.198.1 ipv4.method manual
-nmcli connection up "Wired connection 1"
+ip a
 ```
+Cette commande affiche les informations réseau de la machine. Cherche une ligne qui commence par `inet` (pas `inet6`, qui est autre chose) suivie d'une adresse type `192.168.198.XX` — si tu la vois, c'est gagné, la machine a bien une adresse IP.
 
-✔️ Test :
+**Pour tester que ça atteint bien le serveur CheckMK** :
 ```bash
 ping 192.168.198.21
-curl -I http://192.168.198.21/monitoring
 ```
+Cette commande envoie des petits paquets de test vers cette adresse et affiche si elle répond. Si tu vois des lignes qui défilent avec des temps de réponse (genre `time=1.2 ms`), c'est bon, la connexion fonctionne. Arrête le test avec `Ctrl + C`.
+
+> 💡 **Pas besoin de fixer l'adresse IP maintenant.** On garde le DHCP dynamique (automatique) pendant toute la configuration. On ne la fixera qu'à la toute fin du projet (section 14), une fois que tout le reste fonctionne.
 
 ---
 
-## 7. Import du certificat WatchGuard (rootCA)
+## 7. Installer le certificat de l'entreprise
 
-### 7.1 — Confirme avec Zakk que c'est le bon fichier
+**Pourquoi cette étape :** le pare-feu de la mairie (un boîtier appelé WatchGuard) inspecte les connexions sécurisées (HTTPS) qui sortent vers internet. Pour que ça se passe, il se fait passer pour un intermédiaire de confiance — mais pour que la machine accepte ça sans le voir comme une intrusion, il faut lui donner le "certificat" du WatchGuard, qui prouve qu'il est légitime. Sans cette étape, l'installation de Chromium (section suivante) va échouer avec une erreur de sécurité.
 
-Message court avant de te déplacer :
-> "J'ai trouvé un fichier `certificate.crt` (délivré à/par : rootCA) sur K:\03_Systemes_Information\... C'est bien le certificat racine du WatchGuard qu'il faut que j'installe sur un poste dédié pour qu'il puisse joindre le Snap Store en HTTPS ?"
+### 7.1 — Brancher la clé USB contenant le certificat
 
-### 7.2 — Copier le certificat depuis la clé USB
+Branche la clé USB sur laquelle tu avais copié le fichier `certificate.crt` (préparée en section 1).
 
+### 7.2 — Trouver où la clé a été montée
+
+Sur Ubuntu Desktop, une clé USB branchée s'ouvre généralement automatiquement dans une fenêtre. Pour connaître son emplacement exact en ligne de commande, tape :
 ```bash
-# Le point de montage exact peut varier, vérifie avec :
 lsblk
-# Généralement automonté sous /media/checkmk-kiosk/NOM_CLE/
+```
+Repère ta clé dans la liste, tu verras à côté un chemin du type `/media/checkmk-kiosk/NOM_DE_LA_CLE`.
 
-sudo cp /media/checkmk-kiosk/*/certif/certificate.crt /usr/local/share/ca-certificates/rootca.crt
+### 7.3 — Copier le certificat au bon endroit
+
+Cette commande copie ton fichier certificat dans le dossier où le système va chercher les certificats de confiance supplémentaires :
+```bash
+sudo cp /media/checkmk-kiosk/NOM_DE_LA_CLE/certif/certificate.crt /usr/local/share/ca-certificates/rootca.crt
+```
+Remplace `NOM_DE_LA_CLE` par le nom exact que tu as vu à l'étape précédente.
+
+Puis, cette commande dit au système de "recharger" sa liste de certificats de confiance en tenant compte du nouveau fichier ajouté :
+```bash
 sudo update-ca-certificates
 ```
-Tu dois voir `1 added` dans le message de sortie.
+Tu dois voir un message affichant quelque chose comme `1 added` — ça confirme que le certificat a bien été pris en compte.
 
-### 7.3 — Vérification
+### 7.4 — Vérifier que ça fonctionne
 
 ```bash
 curl -v https://api.snapcraft.io 2>&1 | grep -i issuer
 ```
-✔️ L'erreur `x509: certificate signed by unknown authority` doit avoir disparu.
+Cette commande teste une connexion sécurisée vers un serveur externe et affiche qui a "signé" le certificat rencontré. Si tu vois un nom cohérent avec ton certificat (et pas de message d'erreur mentionnant "unknown authority" / "autorité inconnue"), c'est validé.
 
 ---
 
-## 8. Installation de Chromium
+## 8. Installer le navigateur Chromium
+
+**Ce qu'on fait :** on installe le navigateur qui va afficher le dashboard CheckMK en plein écran.
 
 ```bash
 sudo snap install chromium
+```
+Cette commande télécharge et installe Chromium depuis le "Snap Store" (une sorte de magasin d'applications Ubuntu). Ça peut prendre quelques minutes selon la vitesse du réseau (le téléchargement fait plusieurs centaines de mégaoctets).
+
+**Pour vérifier que c'est bien installé :**
+```bash
 which chromium
 ```
-Chemin attendu : `/snap/bin/chromium`.
+Tu dois voir s'afficher un chemin comme `/snap/bin/chromium` — ça confirme que la commande `chromium` existe bien sur ce système et qu'on pourra l'utiliser dans le script de kiosque juste après.
 
 ---
 
-## 9. Configuration du kiosque sur GNOME
+## 9. Configurer le mode kiosque
 
-### 9.1 — Désactiver l'écran de verrouillage et la mise en veille
+**Ce qu'on fait ici :** on crée un petit script (un fichier texte contenant une suite de commandes) qui va lancer Chromium directement en plein écran sur le dashboard CheckMK, et on configure le système pour lancer ce script automatiquement à chaque démarrage.
 
-```bash
-gsettings set org.gnome.desktop.session idle-delay 0
-gsettings set org.gnome.desktop.screensaver lock-enabled false
-gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
-gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
-```
+### 9.1 — Créer le fichier script
 
-### 9.2 — Désactiver les notifications système (évite les popups qui viendraient polluer l'affichage)
-
-```bash
-gsettings set org.gnome.desktop.notifications show-banners false
-```
-
-### 9.3 — Masquer le curseur de souris en kiosque
-
-```bash
-sudo apt install -y unclutter
-```
-On l'ajoutera au lancement automatique juste après.
-
-### 9.4 — Créer le script de lancement Chromium
-
+Cette commande ouvre un éditeur de texte dans le terminal, pour un fichier qui n'existe pas encore et qu'on va créer :
 ```bash
 sudo nano /usr/bin/chromium-wallboard.sh
 ```
+`nano` est un petit éditeur de texte simple, directement dans le terminal. Une fois la fenêtre ouverte, copie-colle ce contenu dedans (`Ctrl+Shift+V` pour coller) :
 ```bash
 #!/bin/bash
 URL="http://192.168.198.21/monitoring"
-
-unclutter -idle 0.1 -root &
 
 chromium \
   --kiosk \
@@ -266,16 +257,47 @@ chromium \
   --check-for-update-interval=31536000 \
   "$URL"
 ```
+
+**Ce que fait chaque ligne du script**, en résumé :
+- `URL="..."` : c'est l'adresse du dashboard qu'on veut afficher, stockée dans une variable pour pouvoir la modifier facilement plus tard sans toucher au reste
+- `--kiosk` : lance Chromium en plein écran, sans aucune interface (barre d'adresse, onglets)
+- `--noerrdialogs` / `--disable-infobars` / `--disable-session-crashed-bubble` : empêchent Chromium d'afficher des petites fenêtres d'avertissement (par exemple s'il a crashé une fois) qui viendraient polluer l'affichage
+- `--check-for-update-interval=31536000` : espace les vérifications de mise à jour de Chromium à une fois par an, pour éviter que ça interfère avec l'affichage continu
+
+**Pour enregistrer et fermer nano :** appuie sur `Ctrl + O` (la lettre O, pas un zéro) pour enregistrer, puis Entrée pour confirmer le nom du fichier, puis `Ctrl + X` pour quitter l'éditeur.
+
+### 9.2 — Rendre ce script exécutable
+
+Par défaut, un fichier texte n'est pas considéré comme un programme qu'on peut lancer. Cette commande lui donne "le droit de s'exécuter" :
 ```bash
 sudo chmod +x /usr/bin/chromium-wallboard.sh
 ```
 
-### 9.5 — Lancer ce script automatiquement à l'ouverture de session GNOME
+### 9.3 — Tester le script manuellement une première fois
 
+Avant de le configurer pour un lancement automatique, teste-le directement pour voir si ça marche :
+```bash
+/usr/bin/chromium-wallboard.sh
+```
+Chromium devrait s'ouvrir en plein écran sur le dashboard CheckMK. Si tu vois bien ça, c'est gagné. Pour fermer, tu peux appuyer sur `Alt + F4`.
+
+Si une erreur s'affiche à la place, note-la précisément — ça voudra dire qu'il faut corriger quelque chose avant de continuer.
+
+### 9.4 — Faire en sorte que ce script se lance automatiquement à chaque ouverture de session
+
+On va créer un petit fichier de configuration qui dit à Ubuntu "lance ce programme dès que la session utilisateur s'ouvre".
+
+D'abord, crée le dossier prévu pour ce genre de fichiers (s'il n'existe pas déjà) :
 ```bash
 mkdir -p ~/.config/autostart
+```
+`~` est un raccourci qui représente ton dossier personnel (`/home/checkmk-kiosk`). `mkdir -p` crée le dossier, et ne renvoie pas d'erreur s'il existe déjà.
+
+Puis crée le fichier de configuration :
+```bash
 nano ~/.config/autostart/wallboard.desktop
 ```
+Colle ce contenu :
 ```ini
 [Desktop Entry]
 Type=Application
@@ -285,18 +307,59 @@ X-GNOME-Autostart-enabled=true
 Name=Wallboard CheckMK
 Comment=Lance le kiosque CheckMK au démarrage de session
 ```
+Enregistre (`Ctrl+O`, Entrée) et quitte (`Ctrl+X`).
 
-✔️ **Test** : redémarre la machine. La session GNOME doit s'ouvrir automatiquement (autologin), puis Chromium doit se lancer en plein écran quelques secondes après.
+✔️ **Test complet :** redémarre la machine (`sudo reboot`). À la remise en route, tu dois voir : le bureau Ubuntu s'ouvre automatiquement (grâce à l'autologin coché à l'installation), puis Chromium se lance en plein écran quelques secondes après, sur le dashboard CheckMK.
 
 ---
 
-## 10. Résilience : anti-veille, watchdog, démarrage auto
+## 10. Empêcher l'écran de se mettre en veille
 
-### 10.1 — Watchdog pour relancer Chromium en cas de crash
+**Pourquoi :** par défaut, Ubuntu éteint l'écran et verrouille la session après un moment d'inactivité (pas de mouvement de souris/clavier) — exactement ce qu'on ne veut pas pour un panneau d'affichage permanent.
+
+Ces commandes désactivent ces comportements. Chacune modifie un réglage précis du système :
+
+```bash
+gsettings set org.gnome.desktop.session idle-delay 0
+```
+→ Désactive le délai avant verrouillage automatique de session (`0` = jamais).
+
+```bash
+gsettings set org.gnome.desktop.screensaver lock-enabled false
+```
+→ Désactive le verrouillage d'écran par mot de passe même si l'écran de veille s'active.
+
+```bash
+gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
+```
+→ Dit au système "ne fais rien de spécial (pas de mise en veille) quand la machine est inactive et branchée sur secteur".
+
+```bash
+gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
+```
+→ Désactive complètement l'activation de l'économiseur d'écran.
+
+```bash
+gsettings set org.gnome.desktop.notifications show-banners false
+```
+→ Désactive les petites notifications qui pourraient apparaître en haut de l'écran (mises à jour disponibles, etc.) et venir gêner l'affichage.
+
+Ces réglages s'appliquent immédiatement, pas besoin de redémarrer pour les tester.
+
+---
+
+## 11. Rendre le système résistant aux pannes
+
+**Pourquoi :** le cahier des charges demande qu'en cas de coupure de courant ou de plantage du navigateur, tout reparte automatiquement sans intervention humaine. On va mettre en place deux protections.
+
+### 11.1 — Un "surveillant" qui relance Chromium s'il plante
+
+On crée un deuxième script qui, en boucle, vérifie toutes les 15 secondes si Chromium tourne encore ; s'il ne le voit plus, il le relance.
 
 ```bash
 sudo nano /usr/bin/watchdog-wallboard.sh
 ```
+Contenu à coller :
 ```bash
 #!/bin/bash
 while true; do
@@ -306,10 +369,22 @@ while true; do
   sleep 15
 done
 ```
+
+**Explication ligne par ligne :**
+- `while true; do ... done` : une boucle infinie, qui répète ce qu'il y a dedans indéfiniment
+- `pgrep -x "chromium"` : cherche si un programme nommé exactement "chromium" est actuellement en cours d'exécution
+- `if ! ... > /dev/null` : "si ce programme n'est PAS trouvé" (le `!` veut dire "non")
+- `then /usr/bin/chromium-wallboard.sh &` : si Chromium n'est pas trouvé, relance notre script (le `&` à la fin veut dire "lance ça en arrière-plan, sans bloquer la suite")
+- `sleep 15` : attend 15 secondes avant de recommencer la vérification
+
+Enregistre (`Ctrl+O`, Entrée) et quitte (`Ctrl+X`).
+
+Rends-le exécutable, comme pour le premier script :
 ```bash
 sudo chmod +x /usr/bin/watchdog-wallboard.sh
 ```
-Ajoute un second fichier autostart pour ce watchdog :
+
+Fais-le se lancer automatiquement aussi, avec un deuxième fichier autostart :
 ```bash
 nano ~/.config/autostart/watchdog.desktop
 ```
@@ -322,87 +397,112 @@ X-GNOME-Autostart-enabled=true
 Name=Wallboard Watchdog
 ```
 
-### 10.2 — Reprise après coupure de courant
+### 11.2 — Redémarrage automatique après une coupure de courant
 
-Vérifie dans le BIOS Dell (touche `F2` au démarrage généralement sur les OptiPlex) l'option **"AC Recovery"** ou **"Power On After Power Failure"** → mets-la sur **"Power On"** (parfois appelée "On" tout court selon le BIOS Dell).
+Ce réglage se fait dans le BIOS (le petit programme qui se lance avant même Ubuntu, propre à la carte mère).
 
-### 10.3 — Mises à jour automatiques sans reboot intempestif en journée
+1. Redémarre le PC
+2. Appuie plusieurs fois sur **F2** dès que le logo Dell apparaît, pour entrer dans le BIOS
+3. Cherche une option nommée **"AC Recovery"** ou **"Power On After Power Failure"** (l'emplacement exact varie selon la version du BIOS Dell, regarde dans les menus "Power Management" ou similaire)
+4. Mets cette option sur **"Power On"** (ou "On")
+5. Enregistre et quitte le BIOS (souvent la touche `F10`, avec confirmation)
 
-```bash
-sudo apt install -y unattended-upgrades
-sudo dpkg-reconfigure -plow unattended-upgrades
-```
-Puis configure une fenêtre de reboot nocturne dans `/etc/apt/apt.conf.d/50unattended-upgrades` :
-```
-Unattended-Upgrade::Automatic-Reboot "true";
-Unattended-Upgrade::Automatic-Reboot-Time "03:00";
-```
+Sans ce réglage, si le courant coupe puis revient, le PC resterait éteint tant que personne n'appuie physiquement sur le bouton d'allumage.
 
 ---
 
-## 11. Compte CheckMK dédié "kiosque"
+## 12. Créer le compte CheckMK dédié
 
-1. **Setup > Users** → Ajouter
-2. Nom : `kiosque`
-3. Mot de passe fort (gestionnaire de mots de passe pro)
-4. Rôle : **guest/monitoring uniquement**, lecture seule
-5. Pointe vers une vue/dashboard précis si possible
+**Pourquoi :** plutôt que d'utiliser le compte administrateur de CheckMK sur cet écran affiché en continu dans un lieu public, on crée un compte à droits limités, juste pour la consultation.
+
+1. Depuis n'importe quel autre PC, ouvre `http://192.168.198.21/monitoring` et connecte-toi avec un compte admin CheckMK
+2. Dans le menu, va dans **Setup > Users**
+3. Clique sur "Ajouter un utilisateur" (ou équivalent selon la version)
+4. Nom d'utilisateur : `kiosque`
+5. Choisis un mot de passe solide, à noter dans votre gestionnaire de mots de passe professionnel
+6. Dans le champ "Rôle", choisis un rôle en **lecture seule** (souvent appelé "guest" ou "monitoring" selon la version de CheckMK) — surtout pas "admin"
+7. Enregistre
 
 ---
 
-## 12. Sécurité (SSH / pare-feu)
+## 13. Sécuriser l'accès à distance
 
+**Pourquoi :** le cahier des charges demande un accès SSH pour la maintenance à distance, sans avoir à se déplacer physiquement devant le PC.
+
+Installe le serveur SSH (le programme qui permet à d'autres machines de se connecter à distance à celle-ci) :
 ```bash
 sudo apt install -y openssh-server
+```
+
+Active-le pour qu'il démarre automatiquement avec la machine :
+```bash
 sudo systemctl enable ssh
 ```
+
+**Pour tester depuis un autre PC** (sur le même réseau), une fois que tu connais l'adresse IP de la machine (vue avec `ip a`) :
+```bash
+ssh checkmk-kiosk@192.168.198.XX
+```
+Ça va te demander le mot de passe du compte `checkmk-kiosk` que tu as créé à l'installation.
+
+**Pour plus de sécurité**, on peut désactiver la connexion par simple mot de passe (et n'autoriser que par clé de sécurité — plus technique, à voir plus tard si besoin) :
 ```bash
 sudo nano /etc/ssh/sshd_config
 ```
-```
-PasswordAuthentication no
-```
-- SSH limité à une plage IP/VLAN admin, à valider avec Zakk
-- Pense à désactiver le pare-feu GNOME/ufw seulement si besoin, ou configure une règle explicite pour autoriser le port 22 depuis le VLAN IT :
+Cherche la ligne `PasswordAuthentication` et remplace sa valeur par `no`. Enregistre et quitte, puis redémarre le service :
 ```bash
-sudo ufw allow from 192.168.198.0/24 to any port 22
-sudo ufw enable
+sudo systemctl restart ssh
+```
+⚠️ Ne fais cette dernière partie que si tu as déjà mis en place une clé SSH de secours, sinon tu risques de te retrouver bloquée dehors.
+
+---
+
+## 14. Fixer l'adresse IP (en toute fin de projet)
+
+**À faire seulement une fois que tout le reste fonctionne**, juste avant la mise en production définitive.
+
+### 14.1 — Récupérer l'adresse physique (MAC) de la carte réseau
+
+```bash
+ip link show
+```
+Cherche la ligne qui commence par `link/ether`, suivie d'une suite de chiffres/lettres du type `xx:xx:xx:xx:xx:xx` — c'est l'adresse MAC, un identifiant unique de la carte réseau.
+
+### 14.2 — Transmettre cette information à l'admin réseau
+
+Envoie un message à Zakk avec :
+- Le nom de la machine : `wallboard-desk`
+- L'adresse MAC relevée
+- L'emplacement physique : bureau du desk
+- La demande : réservation DHCP fixe, + autorisation d'accès HTTP vers `192.168.198.21` et SSH entrant depuis le VLAN IT
+
+### 14.3 — Une fois la réservation confirmée par Zakk
+
+Normalement, si c'est bien une réservation DHCP (pas une IP fixée manuellement), tu n'as **rien à faire côté machine** — elle continue de demander une adresse en DHCP normalement, mais le réseau lui donnera toujours la même désormais.
+
+Si jamais on te demande de fixer l'IP manuellement sur la machine plutôt que par réservation réseau, utilise cette commande (à adapter avec la vraie IP donnée par Zakk) :
+```bash
+nmcli connection modify "Wired connection 1" ipv4.addresses 192.168.198.XX/24 ipv4.gateway 192.168.198.1 ipv4.dns 192.168.198.1 ipv4.method manual
+nmcli connection up "Wired connection 1"
 ```
 
 ---
 
-## 13. Tests de recette
+## 15. Vérifier que tout fonctionne (recette)
 
-- [ ] PC installé et relié à la TV du desk
-- [ ] Démarrage → session GNOME auto + Chromium plein écran sur CheckMK, sans intervention
-- [ ] Certificat WatchGuard fonctionnel (`sudo snap refresh` sans erreur TLS)
-- [ ] Test coupure d'alimentation réelle → reprise automatique complète
-- [ ] Aucune veille d'écran ni verrouillage de session après plusieurs heures
-- [ ] IP réservée stable après plusieurs redémarrages
-- [ ] Accès SSH fonctionnel depuis un poste IT
-- [ ] Curseur invisible en continu
-- [ ] Crash volontaire Chromium (`pkill chromium`) → relance automatique en moins de 15s
-- [ ] Aucune notification système ni popup ne vient perturber l'affichage
+Coche chaque point avec ton collègue et/ou l'admin réseau :
 
----
-
-## 14. Suggestions / ajouts
-
-- **RAM à vérifier en premier sur place** (`free -h`) — si elle s'avère juste (2 Go ou moins), prévoir de désactiver les animations GNOME (`gsettings set org.gnome.desktop.interface enable-animations false`) pour fluidifier.
-- **Désactiver le économiseur d'écran GNOME au niveau du gestionnaire de connexion (GDM)** en plus de la session utilisateur, pour être sûre qu'aucune veille ne s'active même avant l'ouverture de session (utile si jamais l'autologin échoue un jour) :
-  ```bash
-  sudo nano /etc/gdm3/greeter.dconf-defaults
-  ```
-  ```
-  [org/gnome/desktop/screensaver]
-  idle-activation-enabled=false
-  ```
-- **Documenter dans ton GitHub la différence d'approche Server vs Desktop** pour ce projet précis — ça montre que tu sais adapter une solution à une contrainte organisationnelle (ici, la volonté du responsable de différencier ce poste du serveur CheckMK existant), un bon point à valoriser dans ton portfolio.
-- **Wallboard natif CheckMK** : toujours une piste à explorer une fois le kiosque de base validé.
-- **Anticipation d'une évolution vers plusieurs pages/vues affichées :** pas besoin de changer quoi que ce soit maintenant. Le script `chromium-wallboard.sh` pointe vers une seule URL en dur, c'est volontairement simple pour cette V1. Le jour où tu voudras afficher plusieurs dashboards en rotation, la solution la plus propre sera de basculer vers le **wallboard natif CheckMK** évoqué juste au-dessus — CheckMK gère nativement la rotation entre plusieurs vues avec son propre système de rafraîchissement. Tu n'auras alors qu'à changer l'URL cible dans le script (une seule ligne) pour pointer vers l'URL du wallboard au lieu d'une vue unique, plutôt que de repartir sur une architecture à onglets multiples/rotation custom côté Chromium, plus fragile à maintenir.
-- **Étiquette physique** sur le boîtier avec hostname/IP/contact IT.
+- [ ] Le PC est installé et branché à la TV du bureau du desk
+- [ ] Au démarrage, sans que tu touches à rien, le bureau s'ouvre tout seul puis Chromium affiche le dashboard CheckMK en plein écran
+- [ ] Aucune barre d'adresse, aucun onglet, curseur de souris invisible
+- [ ] Test du certificat : `sudo snap refresh` ne renvoie pas d'erreur de certificat
+- [ ] Tu débranches puis rebranches la prise électrique → la machine redémarre et réaffiche le dashboard toute seule
+- [ ] Après plusieurs heures, l'écran ne s'éteint jamais et ne se verrouille jamais
+- [ ] Depuis un autre poste, la connexion SSH fonctionne
+- [ ] Tu simules un plantage de Chromium avec la commande `pkill chromium` → il se relance tout seul en moins de 15 secondes
+- [ ] L'adresse IP reste identique après plusieurs redémarrages
+- [ ] Le compte `kiosque` sur CheckMK n'a accès qu'à la vue prévue, pas aux fonctions d'administration
 
 ---
 
 *Document rédigé dans le cadre du BTS SIO SISR — Mairie de Saint-Égrève*
-*v3 — adaptée à Ubuntu Desktop 24.04 LTS sur Dell OptiPlex 3020M, intègre le retour d'expérience des tests VM (certificat WatchGuard)*
