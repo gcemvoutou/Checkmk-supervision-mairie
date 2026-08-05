@@ -65,24 +65,6 @@ Fais cette liste avant de te déplacer, pour ne rien découvrir sur place :
 7. Une fenêtre peut te demander de confirmer que tu veux effacer la clé — clique sur "OK" (vérifie une dernière fois que c'est bien la bonne clé)
 8. Attends la fin (une barre de progression s'affiche), ça prend généralement 5 à 10 minutes
 
-### Si tu fais ça depuis un PC Linux
-
-Ouvre un terminal (`Ctrl + Alt + T`), puis :
-
-```bash
-lsblk
-```
-Cette commande affiche la liste de tous les disques connectés à ta machine. Repère ta clé USB dans la liste — regarde la **taille** affichée pour être sûre de ne pas te tromper avec ton disque dur principal. Elle apparaît en général sous un nom comme `sdb` ou `sdc`.
-
-```bash
-sudo dd if=chemin/vers/ubuntu-24.04-desktop-amd64.iso of=/dev/sdX bs=4M status=progress oflag=sync
-```
-Remplace `chemin/vers/ubuntu-24.04-desktop-amd64.iso` par l'emplacement réel de ton fichier téléchargé, et `/dev/sdX` par le nom exact de ta clé (vu avec `lsblk` juste avant — par exemple `/dev/sdb`, **sans** chiffre à la fin).
-
-⚠️ Cette commande écrase tout le contenu du disque que tu indiques, sans demander de confirmation. Vérifie bien deux fois le nom avant d'appuyer sur Entrée.
-
-Ça prend quelques minutes, et rien ne s'affiche pendant un moment — c'est normal, ça travaille en silence jusqu'à la fin.
-
 ---
 
 ## 3. Effacer le disque dur de l'ancien PC
