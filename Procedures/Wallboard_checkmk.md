@@ -123,7 +123,7 @@ Tu es maintenant dans l'installeur pour de vrai. Suis les écrans dans l'ordre :
    - Ton nom : ce que tu veux (ex. "Wallboard Desk")
    - Nom de la machine (ordinateur) : `wallboard-desk`
    - Nom d'utilisateur : `checkmk-kiosk`
-   - Mot de passe : choisis-en un solide, note-le bien quelque part de sûr
+   - Mot de passe : Idrolik
    - **Coche impérativement la case "Se connecter automatiquement"** ✔️ — c'est ce qui permettra à la machine de démarrer directement sur le bureau sans qu'on ait à taper de mot de passe à chaque redémarrage, indispensable pour un affichage autonome
 8. Laisse l'installation se dérouler (ça prend en général 15 à 25 minutes selon la machine et la connexion réseau)
 9. À la fin, un message te demande de retirer le support d'installation (ta clé USB) et d'appuyer sur Entrée pour redémarrer
