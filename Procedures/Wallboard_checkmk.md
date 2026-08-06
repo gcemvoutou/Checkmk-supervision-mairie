@@ -65,6 +65,24 @@ Fais cette liste avant de te déplacer, pour ne rien découvrir sur place :
 7. Une fenêtre peut te demander de confirmer que tu veux effacer la clé — clique sur "OK" (vérifie une dernière fois que c'est bien la bonne clé)
 8. Attends la fin (une barre de progression s'affiche), ça prend généralement 5 à 10 minutes
 
+### Si tu fais ça depuis un PC Linux
+
+Ouvre un terminal (`Ctrl + Alt + T`), puis :
+
+```bash
+lsblk
+```
+Cette commande affiche la liste de tous les disques connectés à ta machine. Repère ta clé USB dans la liste — regarde la **taille** affichée pour être sûre de ne pas te tromper avec ton disque dur principal. Elle apparaît en général sous un nom comme `sdb` ou `sdc`.
+
+```bash
+sudo dd if=chemin/vers/ubuntu-24.04-desktop-amd64.iso of=/dev/sdX bs=4M status=progress oflag=sync
+```
+Remplace `chemin/vers/ubuntu-24.04-desktop-amd64.iso` par l'emplacement réel de ton fichier téléchargé, et `/dev/sdX` par le nom exact de ta clé (vu avec `lsblk` juste avant — par exemple `/dev/sdb`, **sans** chiffre à la fin).
+
+⚠️ Cette commande écrase tout le contenu du disque que tu indiques, sans demander de confirmation. Vérifie bien deux fois le nom avant d'appuyer sur Entrée.
+
+Ça prend quelques minutes, et rien ne s'affiche pendant un moment — c'est normal, ça travaille en silence jusqu'à la fin.
+
 ---
 
 ## 3. Effacer le disque dur de l'ancien PC
@@ -123,7 +141,7 @@ Tu es maintenant dans l'installeur pour de vrai. Suis les écrans dans l'ordre :
    - Ton nom : ce que tu veux (ex. "Wallboard Desk")
    - Nom de la machine (ordinateur) : `wallboard-desk`
    - Nom d'utilisateur : `checkmk-kiosk`
-   - Mot de passe : Idrolik
+   - Mot de passe : choisis-en un solide, note-le bien quelque part de sûr
    - **Coche impérativement la case "Se connecter automatiquement"** ✔️ — c'est ce qui permettra à la machine de démarrer directement sur le bureau sans qu'on ait à taper de mot de passe à chaque redémarrage, indispensable pour un affichage autonome
 8. Laisse l'installation se dérouler (ça prend en général 15 à 25 minutes selon la machine et la connexion réseau)
 9. À la fin, un message te demande de retirer le support d'installation (ta clé USB) et d'appuyer sur Entrée pour redémarrer
@@ -152,27 +170,59 @@ Cette commande liste les fichiers du dossier où tu te trouves. Pas besoin de la
 
 ## 6. Connecter la machine au réseau
 
-**Ce qu'on fait :** on branche la machine au réseau de la mairie pour qu'elle puisse accéder à CheckMK et à internet (pour les mises à jour).
+**Ce qu'on fait :** on branche la machine au réseau de la mairie, on relève ses informations réseau actuelles, et on les transmet à l'admin réseau pour qu'il configure une règle de pare-feu et une IP fixe adaptée.
 
-> ✔️ **Confirmé par l'admin réseau :** la machine reste sur le réseau local classique, pas de VLAN spécial à prévoir. Elle prendra une adresse en **10.4.X.X** (et non 192.168.198.X, qui est l'adresse du serveur CheckMK, sur un autre sous-réseau — c'est normal, ça ne veut pas dire qu'ils ne peuvent pas se joindre, le réseau route entre les deux). Reste en **DHCP dynamique en permanence**, aucune réservation ni IP fixe n'est nécessaire pour ce projet.
+> ⚠️ **Mise à jour importante :** ton poste (`10.x.x.x`) et le serveur CheckMK (`192.168.198.21`) sont sur deux plages IP différentes qui ne communiquent pas par défaut. L'admin réseau va créer une règle de pare-feu pour autoriser ce dialogue, **et passer ta machine en IP fixe** (pas juste une réservation DHCP cette fois, une vraie IP statique). Pour ça, il a besoin de connaître ta configuration réseau **actuelle** (celle attribuée automatiquement par le DHCP).
 
 1. Branche le câble Ethernet entre le PC et une prise réseau murale (ou le switch)
-2. Ubuntu détecte généralement automatiquement la connexion et attribue une adresse IP toute seule (en DHCP, la valeur par défaut)
+2. Ubuntu détecte généralement automatiquement la connexion et attribue une adresse IP toute seule (en DHCP, la valeur par défaut pour l'instant)
 
-**Pour vérifier que ça a marché**, ouvre un terminal et tape :
+### 6.1 — Relever l'IP, le masque et la passerelle actuels
+
+Ouvre un terminal et tape :
 ```bash
 ip a
 ```
-Cette commande affiche les informations réseau de la machine. Cherche une ligne qui commence par `inet` (pas `inet6`, qui est autre chose) suivie d'une adresse type `10.4.X.X` — si tu la vois, c'est gagné, la machine a bien une adresse IP.
+Cherche la ligne qui commence par `inet`, suivie d'une adresse du type `10.X.X.X/24` (ou un autre chiffre après le `/`, c'est le masque exprimé en notation courte — note ce chiffre aussi, ex. `/24`).
 
-**Pour tester que ça atteint bien le serveur CheckMK** :
+Pour connaître la passerelle (la porte de sortie de ton réseau local, souvent la première adresse de la plage) :
+```bash
+ip route | grep default
+```
+Ça affiche une ligne du type `default via 10.X.X.1 dev enp0s3` — l'adresse après `via` est ta passerelle.
+
+### 6.2 — Transmettre ces informations à l'admin réseau
+
+Il t'a demandé : IP actuelle, masque, passerelle. Envoie-lui simplement ces trois valeurs relevées à l'étape précédente.
+
+### 6.3 — Une fois qu'il te communique la nouvelle IP fixe
+
+Il va te répondre avec la configuration à appliquer : une nouvelle adresse IP fixe (probablement toujours en `10.x.x.x`, ou peut-être une adresse dédiée sur une autre plage — suis simplement ce qu'il te donne), le masque, la passerelle, et éventuellement un serveur DNS.
+
+Applique cette configuration avec la commande suivante (remplace les valeurs entre `<>` par celles qu'il t'a données) :
+```bash
+sudo nmcli connection modify "Wired connection 1" ipv4.addresses <NOUVELLE_IP>/<MASQUE> ipv4.gateway <PASSERELLE> ipv4.dns <DNS> ipv4.method manual
+sudo nmcli connection up "Wired connection 1"
+```
+
+> 💡 Si le nom de la connexion n'est pas exactement `"Wired connection 1"` chez toi, regarde son nom réel avec :
+> ```bash
+> nmcli connection show
+> ```
+> et utilise le nom affiché à la place.
+
+### 6.4 — Vérifier que tout fonctionne après le changement
+
+```bash
+ip a
+```
+Confirme que la nouvelle IP fixe est bien appliquée (elle doit apparaître directement, sans attendre de bail DHCP).
+
 ```bash
 ping 192.168.198.21
 curl -I http://192.168.198.21/monitoring
 ```
-Le `ping` envoie des petits paquets de test et affiche si le serveur répond. Le `curl -I` va un cran plus loin : il vérifie que la page web elle-même répond bien (le ping peut passer alors que le port web est bloqué, donc les deux tests sont complémentaires). Arrête le ping avec `Ctrl + C`.
-
-Comme la machine reste sur le même réseau du début à la fin (pas de bascule de VLAN prévue), **ce test fait ici est définitif** — pas besoin de le refaire une deuxième fois en toute fin de projet.
+Une fois que l'admin a bien mis en place sa règle de pare-feu de son côté, ces deux commandes doivent maintenant réussir — c'est le vrai test de validation de tout ce chantier réseau.
 
 ---
 
@@ -431,7 +481,7 @@ Sans ce réglage, si le courant coupe puis revient, le PC resterait éteint tant
 
 **Pourquoi :** le cahier des charges demande un accès SSH pour la maintenance à distance, sans avoir à se déplacer physiquement devant le PC.
 
-> 💡 **Comme la machine reste en IP dynamique (DHCP, confirmé par l'admin réseau) et sans VLAN spécial**, son adresse IP peut changer d'un redémarrage à l'autre. Ce n'est pas un problème pour le SSH en lui-même, juste une petite contrainte pratique : il faut connaître l'IP du moment pour s'y connecter. La section 13.4 ci-dessous te donne une astuce simple pour contourner ça sans avoir besoin d'IP fixe.
+> ✔️ **Simplifié grâce à l'IP fixe :** comme la machine a maintenant une adresse IP qui ne change jamais (section 6), tu peux te connecter directement avec cette IP, sans astuce particulière.
 
 Installe le serveur SSH (le programme qui permet à d'autres machines de se connecter à distance à celle-ci) :
 ```bash
@@ -443,9 +493,9 @@ Active-le pour qu'il démarre automatiquement avec la machine :
 sudo systemctl enable ssh
 ```
 
-**Pour tester depuis un autre PC** (sur le même réseau), une fois que tu connais l'adresse IP de la machine (vue avec `ip a`, elle commencera par `10.4.`) :
+**Pour tester depuis un autre PC** (sur le même réseau), avec l'IP fixe donnée par l'admin réseau (section 6.3) :
 ```bash
-ssh checkmk-kiosk@10.4.X.X
+ssh checkmk-kiosk@<IP_FIXE>
 ```
 Ça va te demander le mot de passe du compte `checkmk-kiosk` que tu as créé à l'installation.
 
@@ -459,23 +509,6 @@ sudo systemctl restart ssh
 ```
 ⚠️ Ne fais cette dernière partie que si tu as déjà mis en place une clé SSH de secours, sinon tu risques de te retrouver bloquée dehors.
 
-### 13.4 — Astuce pour ne pas dépendre de l'IP du moment : se connecter par nom plutôt que par adresse
-
-Comme l'IP peut changer à chaque redémarrage, on installe un petit outil qui permet de joindre la machine par un **nom fixe** (`wallboard-desk.local`) plutôt que par son adresse IP — le nom, lui, ne change jamais, même si l'IP derrière change.
-
-```bash
-sudo apt install -y avahi-daemon
-```
-Ce paquet fait fonctionner un service qui annonce automatiquement le nom de la machine sur le réseau local. Aucune configuration supplémentaire n'est nécessaire, il démarre tout seul.
-
-**Pour tester depuis un autre PC (sous Linux ou Mac, ou Windows avec Bonjour installé) :**
-```bash
-ssh checkmk-kiosk@wallboard-desk.local
-```
-Si ça se connecte sans que tu aies eu besoin de taper d'IP, c'est gagné — tu peux désormais toujours utiliser ce nom, peu importe l'IP DHCP attribuée du moment.
-
-> 💡 Si ça ne fonctionne pas depuis un PC Windows sans logiciel supplémentaire, ce n'est pas grave : en dépannage, tu peux toujours faire un `ip a` en direct sur la machine (via un écran/clavier branché ponctuellement, ou en demandant à quelqu'un sur place) pour récupérer l'IP du moment.
-
 ---
 
 ## 14. Vérifier que tout fonctionne (recette)
@@ -487,8 +520,9 @@ Coche chaque point avec ton collègue et/ou l'admin réseau :
 - [ ] Aucune barre d'adresse, aucun onglet, curseur de souris invisible
 - [ ] Test du certificat : `sudo snap refresh` ne renvoie pas d'erreur de certificat
 - [ ] Tu débranches puis rebranches la prise électrique → la machine redémarre et réaffiche le dashboard toute seule
+- [ ] L'adresse IP fixe reste bien identique après plusieurs redémarrages
 - [ ] Après plusieurs heures, l'écran ne s'éteint jamais et ne se verrouille jamais
-- [ ] Depuis un autre poste, la connexion SSH fonctionne (via `wallboard-desk.local` ou l'IP du moment)
+- [ ] Depuis un autre poste, la connexion SSH fonctionne via l'IP fixe
 - [ ] Tu simules un plantage de Chromium avec la commande `pkill chromium` → il se relance tout seul en moins de 15 secondes
 - [ ] Le compte `kiosque` sur CheckMK n'a accès qu'à la vue prévue, pas aux fonctions d'administration
 
